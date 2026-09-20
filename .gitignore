@@ -1,0 +1,55 @@
+# --- python ---
+__pycache__/
+*.py[cod]
+*.pyc
+*.pyo
+*.egg-info/
+.pytest_cache/
+
+# --- virtual environments ---
+venv/
+.venv/
+env/
+har-infer/
+
+# --- model weights (tracked out of band, not in git) ---
+# patterns containing a slash anchor to this file's directory, so model
+# patterns are written unanchored to match at any nesting depth
+*.pt
+*.pth
+*.onnx
+*.engine
+*.task
+*.tflite
+*.weights
+
+# --- logs ---
+logs/*.log
+logs/**/*.log
+*.log
+
+# --- raw media / large binaries ---
+raw_videos/
+recordings/
+*.mp4
+*.avi
+*.mkv
+*.mov
+*.webm
+*.bag
+*.npz
+*.h5
+*.zip
+*.tar
+*.tar.gz
+*.7z
+
+# --- os / editor ---
+.DS_Store
+Thumbs.db
+desktop.ini
+.idea/
+.vscode/
+
+# keep the folder structure itself in git
+!.gitkeep

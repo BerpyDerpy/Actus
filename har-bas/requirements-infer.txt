@@ -1,0 +1,51 @@
+# Inference / demo dependencies for the HAR on-board demo target.
+#
+# Target machine: Windows 11, RTX 4070 Laptop (8 GB, sm_89), driver CUDA 13.3.
+# Verified on Python 3.13.2.
+#
+# Install:
+#   python -m venv har-infer
+#   har-infer\Scripts\activate
+#   pip install -r requirements-infer.txt
+#
+# Training-only and labeling tooling (CVAT, Roboflow, label-studio, training
+# frameworks) belongs on the training machine and is deliberately absent here.
+
+# --- CUDA-enabled torch -------------------------------------------------
+# The +cu130 builds are NOT on PyPI; this extra index is required. Pick the
+# cuXXX index matching the driver (13.3 here -> cu130).
+--extra-index-url https://download.pytorch.org/whl/cu130
+torch==2.14.0+cu130
+torchvision==0.29.0+cu130
+
+# --- detection ----------------------------------------------------------
+ultralytics==8.4.156
+
+# --- pose ---------------------------------------------------------------
+# NOTE: mediapipe 1.x removed the legacy `mp.solutions.pose` API. Use the
+# Tasks API (mediapipe.tasks.python.vision.PoseLandmarker), which needs a
+# .task bundle downloaded separately into models/pose/ -- see check_pose.py.
+# No GPU delegate ships in the Windows wheel, so pose runs on CPU/XNNPACK.
+mediapipe==1.0.1
+
+# --- vision / markers ---------------------------------------------------
+# opencv-contrib-python is the superset that provides cv2.aruco. Both are
+# listed as specified, and their versions MUST stay identical -- they install
+# into the same `cv2` namespace and mismatched versions shadow each other.
+opencv-python==5.0.0.93
+opencv-contrib-python==5.0.0.93
+
+# --- offline voice alerts -----------------------------------------------
+# piper-tts was evaluated and rejected on this machine: it ships Windows
+# wheels for cp39 only, and its piper-phonemize dependency has no Windows
+# wheel at all (source build against espeak-ng). pyttsx3 drives the built-in
+# SAPI5 voices offline with no extra runtime.
+pyttsx3==2.99
+
+# --- monitoring GUI -----------------------------------------------------
+# PyQt6 installed cleanly; the Flask + Flask-SocketIO fallback is not needed.
+PyQt6==6.11.0
+
+# --- core ---------------------------------------------------------------
+numpy==2.5.2
+PyYAML==6.0.3
