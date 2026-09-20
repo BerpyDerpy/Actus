@@ -27,6 +27,8 @@ har-infer/
 logs/*.log
 logs/**/*.log
 *.log
+# manual-test snapshots land here
+logs/*.png
 
 # --- raw media / large binaries ---
 raw_videos/
