@@ -5,6 +5,8 @@ only**; training and labeling tooling lives on the training machine.
 
 ## Environment
 
+### Windows / CUDA (training/demo target)
+
 The venv lives **outside** this tree, at `C:\Users\nandu\venvs\har-infer`, because
 the project sits in a OneDrive folder and a CUDA torch install is several GB of
 binaries that OneDrive would try to sync. Reproducibility comes from
@@ -18,6 +20,34 @@ pip install -r requirements-infer.txt
 
 Verified: torch 2.14.0+cu130, `torch.cuda.is_available() == True`,
 RTX 4070 Laptop GPU (sm_89, 8 GB), driver CUDA 13.3.
+
+### macOS / Apple Silicon (dev port)
+
+No OneDrive constraint here, so the venv lives at `har-bas/.venv` (git-ignored).
+Use `requirements-infer-macos.txt`, not `requirements-infer.txt` -- several
+pins differ from the Windows/CUDA set (see the comments in that file for why):
+torch has no CUDA build to fetch, mediapipe is pinned to the 0.10.x line
+because 1.x crashes PoseLandmarker on macOS, and opencv/numpy follow suit.
+
+```
+python3.10 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements-infer-macos.txt
+pip install --no-deps pyttsx3==2.99
+```
+
+Detection and pose both run happily on CPU, and detection additionally gets
+Apple Silicon's Metal backend for free -- code picks `device="mps"` via
+`torch.backends.mps.is_available()` wherever it previously checked
+`torch.cuda.is_available()`, falling back to CPU otherwise. No code changes
+are needed to run the exact same scripts as the Windows/CUDA target.
+
+Verified: torch 2.14.0, `torch.backends.mps.is_available() == True`, Apple M2.
+
+Camera access needs a one-time macOS permission grant: the first run of any
+script that opens `cv2.VideoCapture` triggers a system prompt for whichever
+app owns the terminal (Terminal.app, iTerm, VS Code, ...); if it's denied or
+missed, re-enable it under System Settings -> Privacy & Security -> Camera.
 
 ## Layout
 
