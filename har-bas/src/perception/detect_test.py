@@ -50,12 +50,24 @@ def open_camera(index: int = 0) -> cv2.VideoCapture:
     return cap
 
 
+def pick_device() -> tuple[str | int, str]:
+    """Best compute device Ultralytics can target, plus a label to print.
+
+    CUDA first (Windows/Linux dev boxes), then Apple Silicon's MPS backend,
+    then CPU everywhere else.
+    """
+    if torch.cuda.is_available():
+        return 0, torch.cuda.get_device_name(0)
+    if torch.backends.mps.is_available():
+        return "mps", "Apple Silicon (MPS)"
+    return "cpu", "CPU only"
+
+
 def main() -> None:
     if not MODEL_PATH.exists():
         sys.exit(f"ERROR: missing weights at {MODEL_PATH}")
 
-    device = 0 if torch.cuda.is_available() else "cpu"
-    gpu = torch.cuda.get_device_name(0) if torch.cuda.is_available() else "CPU only"
+    device, gpu = pick_device()
     print(f"device: {device}  ({gpu})")
 
     model = YOLO(str(MODEL_PATH))

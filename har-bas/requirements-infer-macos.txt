@@ -1,0 +1,66 @@
+# Inference / demo dependencies for the HAR on-board demo target, ported to
+# run on Apple Silicon Macs (the training/demo machine is normally Windows +
+# CUDA -- see requirements-infer.txt for that environment).
+#
+# Target machine: macOS, Apple Silicon (arm64). Verified on Python 3.10.
+#
+# Install:
+#   python3.10 -m venv .venv
+#   source .venv/bin/activate
+#   pip install -r requirements-infer-macos.txt
+#   pip install --no-deps pyttsx3==2.99   # see the pyttsx3 note below for why
+#
+# Training-only and labeling tooling (CVAT, Roboflow, label-studio, training
+# frameworks) belongs on the training machine and is deliberately absent here.
+
+# --- torch ----------------------------------------------------------------
+# No CUDA on Apple Silicon; the default PyPI wheel already targets macOS arm64
+# and ships Metal Performance Shaders (MPS) support, so no extra index is
+# needed here (contrast requirements-infer.txt's --extra-index-url). Code
+# picks device="mps" at runtime instead of a CUDA index.
+torch==2.14.0
+torchvision==0.29.0
+
+# --- detection ----------------------------------------------------------
+ultralytics==8.4.156
+
+# --- pose ---------------------------------------------------------------
+# Pinned to the 0.10.x line, NOT mediapipe 1.x (the version the Windows/CUDA
+# machine uses). mediapipe 1.0.0/1.0.1's Tasks Vision graphs unconditionally
+# construct a Metal helper in TensorsToDetectionsCalculator::Open() even on a
+# CPU-only graph, which aborts the process on macOS with
+# "Check failed: service_ Service is unavailable" the moment PoseLandmarker
+# is created -- see google-ai-edge/mediapipe#6356. 0.10.21 predates that
+# regression and is confirmed working here. It also requires Python <=3.12
+# (only cp39-cp312 wheels exist) and numpy<2, which is why this file's numpy
+# and opencv pins differ from requirements-infer.txt.
+mediapipe==0.10.21
+
+# --- vision / markers ---------------------------------------------------
+# opencv-contrib-python is the superset that provides cv2.aruco. Both are
+# listed as specified, and their versions MUST stay identical -- they install
+# into the same `cv2` namespace and mismatched versions shadow each other.
+# Pinned to the 4.x line (not 5.0.0.93 as on Windows): opencv 5.x requires
+# numpy>=2, which conflicts with mediapipe 0.10.21's numpy<2 requirement.
+opencv-python==4.11.0.86
+opencv-contrib-python==4.11.0.86
+
+# --- offline voice alerts -----------------------------------------------
+# pyttsx3 drives the built-in macOS voices offline via the `nsss` driver
+# (NSSpeechSynthesizer), no extra runtime needed. It is intentionally NOT
+# listed here: pyttsx3 unconditionally depends on the `pyobjc` metapackage on
+# Darwin (150+ unrelated Cocoa frameworks -- Vision, WebKit, GameKit, ...),
+# but `nsss` only imports AppKit/Foundation. Installing it with `--no-deps`
+# (see the Install section above) plus these two packages gets the same
+# working driver without the other ~150.
+pyobjc-core==12.2.2
+pyobjc-framework-Cocoa==12.2.2
+
+# --- monitoring GUI -----------------------------------------------------
+PyQt6==6.11.0
+
+# --- core ---------------------------------------------------------------
+# numpy<2 to satisfy mediapipe 0.10.21 (see above); ultralytics and torch are
+# both fine with 1.26.x.
+numpy==1.26.4
+PyYAML==6.0.3
