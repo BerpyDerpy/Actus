@@ -116,11 +116,23 @@ class VideoSource:
         self.height = height
         self.fps = fps
         self.fourcc = fourcc
-        # DirectShow opens far faster than MSMF on Windows and is less prone
-        # to hanging on the first read.
         if backend is None:
-            backend = cv2.CAP_DSHOW if platform.system() == "Windows" else cv2.CAP_ANY
+            if isinstance(src, str):
+                # A stream URL (phone apps like IP Webcam). DirectShow is a
+                # local-device API and cannot open one, so it would retry
+                # forever; FFMPEG handles http/rtsp on every platform.
+                backend = cv2.CAP_FFMPEG
+            elif platform.system() == "Windows":
+                # DirectShow opens far faster than MSMF on Windows and is less
+                # prone to hanging on the first read.
+                backend = cv2.CAP_DSHOW
+            else:
+                backend = cv2.CAP_ANY
         self.backend = backend
+        # What the source actually delivers, filled in on open. Network
+        # sources ignore width/height/fourcc requests -- the phone app
+        # decides -- so log this, never the requested values.
+        self.negotiated: dict = {}
         self.reconnect_delay = reconnect_delay
         self.max_reconnect_delay = max_reconnect_delay
         self.max_read_failures = max_read_failures
@@ -206,6 +218,16 @@ class VideoSource:
             cap.set(cv2.CAP_PROP_FPS, self.fps)
         # Keep the driver buffer shallow so we read live frames, not a backlog.
         cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
+        code = int(cap.get(cv2.CAP_PROP_FOURCC))
+        fourcc = "".join(chr((code >> (8 * i)) & 0xFF) for i in range(4))
+        self.negotiated = {
+            "width": int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)),
+            "height": int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)),
+            "fps": cap.get(cv2.CAP_PROP_FPS),
+            # DirectShow reports the format it hands OpenCV, which can read
+            # YUY2 even while MJPG crosses the cable; trust measured fps.
+            "fourcc": fourcc if fourcc.isprintable() and fourcc.strip() else None,
+        }
         self._cap = cap
         return True
 

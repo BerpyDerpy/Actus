@@ -1,0 +1,37 @@
+# Camera intrinsics for 'webcam', written by tools/calibrate_camera.py.
+# Valid ONLY at 1280x720. Recording at any other resolution needs a new
+# calibration. Load with load_calibration() from the same tool.
+name: webcam
+calibrated_at: '2026-09-22T14:09:21'
+image_width: 1280
+image_height: 720
+source: '0'
+fourcc_requested: MJPG
+fourcc_reported: YUY2
+measured_fps: 29.9
+model: opencv_pinhole_k1k2p1p2k3
+camera_matrix:
+- [782.9765, 0.0, 623.9775]
+- [0.0, 779.2106, 380.6228]
+- [0.0, 0.0, 1.0]
+dist_coeffs: [0.07854274, -0.22159697, 0.00880412, -0.01139076, 0.10880666]
+rms_reprojection_px: 0.6076
+intrinsics_std_px: {fx: 8.367, fy: 8.311, cx: 6.786, cy: 7.955}
+per_view_error_px: {mean: 0.5739, max: 1.0197}
+views_used: 20
+views_rejected: 0
+views_captured: 20
+corners_used: 385
+frame_coverage: 0.828
+frame_corners_reached: 0
+views_tilted: 10
+max_tilt_deg: 63.1
+hfov_deg: 78.52
+vfov_deg: 49.59
+board: {type: charuco, squares_x: 7, squares_y: 5, square_mm: 35.0, marker_mm: 26.0,
+  dictionary: DICT_5X5_100, legacy_pattern: false}
+fix_k3: false
+opencv_version: 5.0.0
+warnings:
+- 'focal length uncertain: fx 783 +/- 8 px (1.1%, want < 1%), so metric distances carry the same error'
+- board reached 0 of 4 frame corners -- push it part-way out of frame into each corner

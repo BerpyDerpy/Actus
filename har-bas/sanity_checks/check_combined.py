@@ -1,4 +1,4 @@
-"""Sanity check: YOLOv8n + MediaPipe Pose + ArUco together on one feed.
+"""Sanity check: YOLO11m + MediaPipe Pose + ArUco together on one feed.
 
 This is the number that actually matters -- it is the real compute ceiling
 for the full perception stack running serially on a single frame, which is
@@ -29,7 +29,7 @@ from mediapipe.tasks.python.vision import (
 from ultralytics import YOLO
 
 DURATION = 10.0
-YOLO_MODEL = "yolov8n.pt"
+YOLO_MODEL = "yolo11m.pt"
 POSE_MODEL = Path(__file__).resolve().parents[1] / "models" / "pose" / "pose_landmarker_lite.task"
 WARMUP_FRAMES = 5
 

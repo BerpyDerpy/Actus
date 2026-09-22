@@ -51,7 +51,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from pose_test import VISIBILITY_LEVELS, draw_pose  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[2]
-YOLO_MODEL = ROOT / "yolov8n.pt"
+YOLO_MODEL = ROOT / "yolo11m.pt"
 POSE_MODEL = ROOT / "models" / "pose" / "pose_landmarker_lite.task"
 SNAPSHOT_DIR = ROOT / "logs"
 CONF_LEVELS = (0.25, 0.40, 0.60)

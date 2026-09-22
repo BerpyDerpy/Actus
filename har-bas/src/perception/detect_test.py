@@ -5,7 +5,7 @@ The counterpart to `marker_test.py`, for detection rather than markers.
 draws every box and label so the detector can be judged by eye -- does it
 find the object, is the class right, does the box track it without flicker.
 
-The weights here are stock YOLOv8n trained on COCO, so it recognises the 80
+The weights here are stock YOLO11m trained on COCO, so it recognises the 80
 COCO classes (person, bottle, laptop, scissors ...) and nothing else. Lab
 hardware will read as whatever COCO class is nearest, or not at all; that is
 expected until the custom detector is trained.
@@ -29,7 +29,7 @@ import torch
 from ultralytics import YOLO
 
 ROOT = Path(__file__).resolve().parents[2]
-MODEL_PATH = ROOT / "yolov8n.pt"
+MODEL_PATH = ROOT / "yolo11m.pt"
 SNAPSHOT_DIR = ROOT / "logs"
 CONF_LEVELS = (0.25, 0.40, 0.60)
 WARMUP_FRAMES = 5
@@ -113,7 +113,7 @@ def main() -> None:
             print(f"  [{elapsed:5.1f}s] {fps:5.1f} FPS  ->  {summary}")
             last_report = now
 
-        cv2.imshow("YOLOv8n detection test (COCO)", annotated)
+        cv2.imshow("YOLO11m detection test (COCO)", annotated)
         key = cv2.waitKey(1) & 0xFF
         if key in (ord("q"), 27):
             break

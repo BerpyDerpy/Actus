@@ -41,6 +41,10 @@ curl -L -o models/pose/pose_landmarker_lite.task \
 
 ## Measured baseline
 
+> **Stale:** the numbers below were measured against YOLOv8n. The detector is
+> now YOLO11m, a much larger model, so these figures no longer apply — rerun
+> the checks below and update this table.
+
 Run from this directory. `end-to-end` is capped by the webcam (~24.5 FPS);
 `compute` is the inference cost alone and is the real ceiling.
 
@@ -60,7 +64,7 @@ Combined breakdown: YOLO 14.4 ms + Pose 14.2 ms + ArUco 6.8 ms.
 
 Each opens a live window and is judged by eye, not by its numbers.
 
-`src/perception/detect_test.py` draws YOLOv8n's boxes and class labels on the
+`src/perception/detect_test.py` draws YOLO11m's boxes and class labels on the
 feed, and echoes what it recognises to the console once a second. The weights
 are stock COCO, so it knows the 80 COCO classes and nothing else — lab
 hardware reads as the nearest COCO class or not at all until the custom

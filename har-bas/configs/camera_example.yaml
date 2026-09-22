@@ -1,0 +1,48 @@
+# FORMAT REFERENCE ONLY -- this is not a calibration.
+#
+# Real files are written by tools/calibrate_camera.py as camera_<name>.yaml,
+# one per physical camera AND resolution. Pass the board as printed:
+#
+#   python tools/calibrate_camera.py --name webcam \
+#       --squares-x 7 --squares-y 5 --square-mm <measured> --marker-mm <measured>
+#
+# The numbers below are the uncalibrated pinhole guess marker_test.py uses
+# today (focal = image width, centre = midpoint, no distortion), so this shows
+# the shape of the file and nothing more. rms_reprojection_px is null, which
+# makes load_calibration() refuse to load it.
+name: example
+calibrated_at: null
+image_width: 1280
+image_height: 720
+source: '0'                   # camera index, stream URL, or images:<dir>
+fourcc_requested: MJPG        # null for --from-dir runs
+fourcc_reported: MJPG         # DirectShow may say YUY2 even when MJPG is on the wire;
+measured_fps: null            # ~30 fps at 720p is the real proof it is MJPG
+source_size: null             # [w, h] when a larger stream was --resize-d down; the
+                              # recorder must downscale the same way
+notes: ''                     # --notes: phone app and locked settings (focus, stabilization, lens)
+model: opencv_pinhole_k1k2p1p2k3
+camera_matrix:                # [[fx, 0, cx], [0, fy, cy], [0, 0, 1]], pixels
+- [1280.0, 0.0, 640.0]
+- [0.0, 1280.0, 360.0]
+- [0.0, 0.0, 1.0]
+dist_coeffs: [0.0, 0.0, 0.0, 0.0, 0.0]   # k1, k2, p1, p2, k3
+rms_reprojection_px: null     # < 0.5 good, < 1.0 usable, above that redo it
+intrinsics_std_px: {fx: null, fy: null, cx: null, cy: null}  # 1-sigma; fx under 1% of fx
+per_view_error_px: {mean: null, max: null}
+views_used: 0
+views_rejected: 0             # per-view outliers dropped before the final fit
+views_captured: 0
+corners_used: 0               # ChArUco views can be partial, so this varies
+frame_coverage: null          # share of an 8x8 image grid any corner reached
+frame_corners_reached: 0      # of the 4 corner cells of that grid; want 4
+views_tilted: 0               # views tilted 20+ deg; want 6+, or fx is loose
+max_tilt_deg: null
+board_area_median: null       # share of the frame the whole board covers; want 0.10+
+hfov_deg: 53.13
+vfov_deg: 31.37
+board: {type: charuco, squares_x: 10, squares_y: 7, square_mm: 25.0, marker_mm: 18.0,
+  dictionary: DICT_5X5_100, legacy_pattern: false}  # never DICT_4X4_50, the object markers use it
+k3: 'fixed at 0 (auto: ...)'  # --k3 auto frees k3 only when 3+ frame corners are reached
+opencv_version: null
+warnings: []                  # everything the RMS alone hides; empty is the goal

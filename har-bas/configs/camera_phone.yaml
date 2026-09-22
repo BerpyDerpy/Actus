@@ -1,0 +1,41 @@
+# Camera intrinsics for 'phone', written by tools/calibrate_camera.py.
+# Valid ONLY at 1280x720. Recording at any other resolution needs a new
+# calibration. Load with load_calibration() from the same tool.
+name: phone
+calibrated_at: '2026-09-22T23:19:35'
+image_width: 1280
+image_height: 720
+source: images:logs/calibration/phone/20260922_151302,logs/calibration/phone/20260922_152021,logs/calibration/phone/20260922_205242,logs/calibration/phone/20260922_205622,logs/calibration/phone/20260922_205944,logs/calibration/phone/20260922_210409,logs/calibration/phone/20260922_210929,logs/calibration/phone/20260922_212638,logs/calibration/phone/20260922_213453,logs/calibration/phone/20260922_223043,logs/calibration/phone/20260922_223852,logs/calibration/phone/20260922_224406,logs/calibration/phone/20260922_225422
+fourcc_requested: null
+fourcc_reported: null
+measured_fps: null
+source_size: null
+notes: 'IP Webcam 1280x720, focus locked, stabilization off, 1x main lens; pooled
+  from 13 sessions 2026-09-22 (22:48 excluded: inconsistent)'
+model: opencv_pinhole_k1k2p1p2k3
+camera_matrix:
+- [913.2899, 0.0, 643.8593]
+- [0.0, 907.6467, 308.4655]
+- [0.0, 0.0, 1.0]
+dist_coeffs: [-0.07149977, -0.02938123, -0.00829355, -0.00089891, 0.0]
+rms_reprojection_px: 0.8134
+intrinsics_std_px: {fx: 3.864, fy: 3.856, cx: 2.091, cy: 2.19}
+per_view_error_px: {mean: 0.7447, max: 1.4555}
+views_used: 318
+views_rejected: 22
+views_captured: 340
+corners_used: 7498
+frame_coverage: 1.0
+frame_corners_reached: 4
+views_tilted: 112
+max_tilt_deg: 50.5
+board_area_median: 0.073
+hfov_deg: 70.04
+vfov_deg: 43.27
+board: {type: charuco, squares_x: 7, squares_y: 5, square_mm: 35.0, marker_mm: 26.0,
+  dictionary: DICT_5X5_100, legacy_pattern: false}
+k3: 'fixed at 0 (auto: board median 8% of the frame, too small to separate k3 from
+  fx)'
+opencv_version: 5.0.0
+warnings:
+- 'board small in frame: median 7% of the frame (want 10%+) -- come closer or print a bigger board; a small board hides the perspective that fixes the focal length'

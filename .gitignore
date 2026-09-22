@@ -29,6 +29,8 @@ logs/**/*.log
 *.log
 # manual-test snapshots land here
 logs/*.png
+# calibration frames saved by tools/calibrate_camera.py
+**/logs/calibration/
 
 # --- raw media / large binaries ---
 raw_videos/

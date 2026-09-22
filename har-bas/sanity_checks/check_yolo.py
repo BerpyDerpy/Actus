@@ -1,4 +1,4 @@
-"""Sanity check: stock YOLOv8n inference on the default webcam.
+"""Sanity check: stock YOLO11m inference on the default webcam.
 
 Measures the sustained FPS of detection alone, to establish the compute
 ceiling before any custom detector is trained. Runs for 10 seconds.
@@ -15,7 +15,7 @@ import torch
 from ultralytics import YOLO
 
 DURATION = 10.0
-MODEL = "yolov8n.pt"  # auto-downloaded by ultralytics on first use
+MODEL = "yolo11m.pt"  # auto-downloaded by ultralytics on first use
 WARMUP_FRAMES = 5
 
 
