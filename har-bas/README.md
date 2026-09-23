@@ -53,7 +53,7 @@ missed, re-enable it under System Settings -> Privacy & Security -> Camera.
 
 | Path | Purpose |
 | --- | --- |
-| `configs/` | `step_graph.yaml` (not yet written) |
+| `configs/` | `step_graph.yaml`: the step list every other part reads |
 | `markers/` | ArUco/AprilTag reference images — printable DICT_4X4_50 ids 0-3 |
 | `models/detector/`, `models/pose/`, `models/interaction/` | weights, git-ignored |
 | `src/perception/` | detection, pose, marker tracking |
@@ -61,12 +61,21 @@ missed, re-enable it under System Settings -> Privacy & Security -> Camera.
 | `src/io/` | capture, disk writer, streamer, TTS, logging |
 | `src/gui/` | monitoring dashboard |
 | `sanity_checks/` | standalone benchmarks |
+| `tests/` | unit tests: `python -m unittest discover -s tests -v` |
+| `demo/` | example step scripts for `tools/run_fsm.py` |
 
 Model weights are git-ignored. Re-fetch the pose bundle with:
 
 ```
 curl -L -o models/pose/pose_landmarker_lite.task \
   https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/latest/pose_landmarker_lite.task
+```
+
+and the hand model (used by the GUI overlays) with:
+
+```
+curl -L -o models/hands/hand_landmarker.task \
+  https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/latest/hand_landmarker.task
 ```
 
 ## Measured baseline
@@ -89,6 +98,67 @@ Combined breakdown: YOLO 14.4 ms + Pose 14.2 ms + ArUco 6.8 ms.
 > The webcam negotiates uncompressed YUY2 by default, which caps 720p at
 > ~7 FPS. Every capture path here requests MJPG, which raises it to ~24.5 FPS.
 > Keep that `CAP_PROP_FOURCC` call in any new capture code.
+
+## Step sequencer (demo pipeline)
+
+`src/fsm/sequencer.py` is the real state machine. It takes "step X started"
+observations and turns them into next-step prompts and skipped /
+out-of-order / too-fast / stuck alerts. Until a model exists, the step
+observations come from a script or from hotkeys (`src/fsm/sources.py`).
+
+`tools/run_fsm.py` connects that to voice (`src/io/voice.py`) and the JSONL
+run log (`src/io/event_log.py`, under `logs/runs/`):
+
+```
+python tools/run_fsm.py --video take.mp4                            # tap 0-5, saves take_steps.csv
+python tools/run_fsm.py --video take.mp4 --script take_steps.csv    # deterministic replay
+python tools/run_fsm.py --script demo/skip_s2.csv --mute            # no video, check a script
+```
+
+`tools/gui.py` is the monitoring window over the same session (`src/gui/`):
+video with alert banner, next step, procedure checklist, alert history and
+event log. Opening `take.mp4` picks up `take_steps.csv` beside it; with no
+script, keys 0-5 drive it and are saved as the script when the video ends.
+Every alert keeps the frame it fired on: a thumbnail on the alert card (click
+to enlarge), a JPG in `logs/runs/<run>_alerts/`, and a `snapshot` line in the
+run log pointing at it.
+
+The video carries three overlay layers from `src/perception/perception.py`,
+toggled with the Objects / Hands / Markers buttons (keys O, H, K): YOLO11m
+boxes filtered to bottle / cup / glass / bowl, MediaPipe hand landmarks, and
+ArUco markers labelled by what they are stuck on. They show what the
+perception stack sees; they do not drive the steps yet. Hands rather than
+body pose because the takes are framed on the table: BlazePose needs the
+upper body in view and drew wrong skeletons on these takes. Models load in
+the background for ~6 s after launch; `--no-overlays` skips them.
+
+Under the video, the timeline bar shows one segment per step as the run
+unfolds, red ticks for alerts, amber ticks for questions; hover for details.
+
+**Upside down** (F) turns the feed 180 degrees before perception runs, so it
+tests how perception copes rather than just drawing upside down. Hands and
+markers do not care; YOLO does (flipped take1: cup found on 0/215 frames
+instead of 215/215). So detection is relative to the payload, not the
+camera: the fixed table / container markers say which way is up, and YOLO
+sees the frame levelled to them. With that, flipped and 90-degree-rotated
+take1 detect exactly as upright does.
+
+**Knowing when it is unsure** is scripted like the steps. A script row `?s2`
+makes it say "I can't see clearly. Is the cap off?" (each step's `question`
+in `step_graph.yaml`) and wait. Y or the card's Yes button counts the step
+from when it asked; N repeats the instruction. A `yes` / `no` row answers
+from the script instead, and a question still open when the next step
+arrives lapses unanswered. `takes/take1_unsure_steps.csv` is take1 with the
+unscrew step asked rather than seen:
+
+```
+python tools/gui.py --video takes/take1.mp4 --script takes/take1_unsure_steps.csv
+```
+
+```
+python tools/gui.py --video takes/take1.mp4    # or launch bare and Ctrl+O
+python tools/gui.py --camera 0                 # live webcam + hotkeys
+```
 
 ## Manual tests
 

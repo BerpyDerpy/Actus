@@ -1,0 +1,95 @@
+# The task, as a sequence of steps. This file is the contract: the recorder,
+# the labelling tools, the FSM, the voice alerts and the GUI all read it, so
+# the step ids and their order are defined here and nowhere else.
+#
+# Task: pick up a water bottle, unscrew the cap, pour into a container, screw
+# the cap back on, put the bottle down.
+#
+# What each step's DONE condition is stays in code (src/fsm/), not here: those
+# are thresholds on detector and pose outputs, and they change as the model
+# changes. This file holds what a human has to agree with.
+#
+# prompt        spoken by the voice alerts when this step becomes the next one
+# requires      the step that must come immediately before it; [] means the
+#               sequence may start here
+# min_duration  shorter than this and the step was not really performed -- a
+#               one-frame flicker of the classifier, not a person pouring
+# max_duration  longer than this and the operator is stuck or has wandered off
+# hotkey        the number key record_take.py writes into the steps CSV
+# question      yes/no check asked when the system is unsure the step happened
+
+confirm_seconds: 0.35   # a new step must hold this long before it is believed
+min_confidence: 0.50    # per-frame classifier confidence below this is ignored
+
+steps:
+  - id: s0
+    name: idle
+    prompt: "Ready. Pick up the bottle to begin."
+    requires: []
+    min_duration: 0.0
+    max_duration: null     # waiting is not a fault
+    hotkey: 0
+
+  - id: s1
+    name: pick up bottle
+    prompt: "Pick up the bottle."
+    question: "Have you picked up the bottle?"
+    requires: [s0]
+    min_duration: 0.4
+    max_duration: 20.0
+    hotkey: 1
+
+  - id: s2
+    name: unscrew cap
+    prompt: "Unscrew the cap."
+    question: "Is the cap off?"
+    requires: [s1]
+    min_duration: 1.0
+    max_duration: 30.0
+    hotkey: 2
+
+  - id: s3
+    name: pour into container
+    prompt: "Pour the water into the container."
+    question: "Is the water in the container?"
+    requires: [s2]
+    min_duration: 1.0
+    max_duration: 30.0
+    hotkey: 3
+
+  - id: s4
+    name: screw cap back on
+    prompt: "Screw the cap back on."
+    question: "Is the cap back on?"
+    requires: [s3]
+    min_duration: 1.0
+    max_duration: 30.0
+    hotkey: 4
+
+  - id: s5
+    name: put bottle down
+    prompt: "Put the bottle down."
+    question: "Is the bottle back on the table?"
+    requires: [s4]
+    min_duration: 0.4
+    max_duration: 20.0
+    hotkey: 5
+
+# Spoken and logged when the sequence goes wrong. {step}, {missing} and
+# {expected} are filled in with step names.
+#   skipped       a step started before one it requires; {missing} is the
+#                 earliest requirement not yet done
+#   out_of_order  a step that is already done was started again
+#   ask           the system cannot tell whether {step} happened; {question}
+#                 is that step's question. Answered yes or no by the operator
+#   confirmed     the answer was yes: the step is counted
+#   denied        the answer was no: {prompt} repeats the step's instruction
+messages:
+  skipped: "Wait. You started {step} without {missing}."
+  out_of_order: "Wait. {step} is already done. Next, {expected}."
+  too_fast: "Check {step}. It was over too quickly to have been done."
+  stuck: "Still on {step}. Do you need help?"
+  complete: "Task complete."
+  ask: "I can't see clearly. {question}"
+  confirmed: "Thanks. Noted."
+  denied: "Okay. {prompt}"

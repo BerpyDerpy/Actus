@@ -29,6 +29,8 @@ logs/**/*.log
 *.log
 # manual-test snapshots land here
 logs/*.png
+# per-run event logs written by tools/run_fsm.py
+**/logs/runs/
 # calibration frames saved by tools/calibrate_camera.py
 **/logs/calibration/
 
